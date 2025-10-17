@@ -20,12 +20,8 @@ if not TELEGRAM_BOT_TOKEN:
     logger.error("TELEGRAM_BOT_TOKEN не найден в переменных окружения!")
     exit(1)
 
-async def start(update, context):
-    """Обработка команды /start"""
-    user = update.effective_user
-    await update.message.reply_html(
-        rf"Привет {user.mention_html()}! Я бот для учета согласий родителей. Используйте /help для получения списка команд."
-    )
+# Импортируем обработчики
+from handlers.start import start
 
 async def help_command(update, context):
     """Обработка команды /help"""
@@ -39,6 +35,8 @@ def main():
     # Регистрация обработчиков команд
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("add_teacher", add_teacher))
+    application.add_handler(CommandHandler("remove_teacher", remove_teacher))
 
     # Запуск бота
     logger.info("Запуск бота...")
