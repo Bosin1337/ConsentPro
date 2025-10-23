@@ -43,6 +43,7 @@ def main():
     application.add_handler(upload_consent_conv_handler)
     application.add_handler(CommandHandler("my_consents", my_consents))
     application.add_handler(submit_consent_conv_handler)
+    application.add_handler(reports_conv_handler)
 
     # Добавляем задачу в JobQueue для проверки дедлайнов (например, каждые 60 минут)
     job_queue = application.job_queue
