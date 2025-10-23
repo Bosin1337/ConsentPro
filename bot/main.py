@@ -37,6 +37,9 @@ def main():
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("add_teacher", add_teacher))
     application.add_handler(CommandHandler("remove_teacher", remove_teacher))
+    application.add_handler(CommandHandler("add_class", add_class))
+    application.add_handler(CommandHandler("my_classes", my_classes))
+    application.add_handler(CommandHandler("add_student", add_student))
 
     # Запуск бота
     logger.info("Запуск бота...")
