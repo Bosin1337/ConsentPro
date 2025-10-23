@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes, ConversationHandler, MessageHandler, filt
 from models.consent import create_consent
 from models.class_ import get_classes_by_teacher
 from utils.auth import require_role
+from utils.notifications import send_notification_to_parents
 import logging
 import os
 
