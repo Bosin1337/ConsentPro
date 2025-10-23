@@ -28,7 +28,7 @@ CREATE TABLE classes (
 -- Создание таблицы учеников
 CREATE TABLE students (
     id SERIAL PRIMARY KEY,
-    full_name VARCHAR(25) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
     class_id INT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (class_id) REFERENCES classes (id) ON DELETE CASCADE
@@ -43,4 +43,28 @@ CREATE TABLE parents (
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE,
     UNIQUE (user_id, student_id)
+);
+
+-- Создание таблицы согласий
+CREATE TABLE consents (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    deadline TIMESTAMP WITH TIME ZONE,
+    class_id INT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (class_id) REFERENCES classes (id) ON DELETE CASCADE
+);
+
+-- Создание таблицы для отслеживания статусов сдачи согласий
+CREATE TABLE consent_submissions (
+    id SERIAL PRIMARY KEY,
+    student_id INT NOT NULL,
+    consent_id INT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Не сдано', -- "Не сдано", "Сдано", "Отказался", "Не идет", "Просрочено"
+    submitted_file_path VARCHAR(255),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE,
+    FOREIGN KEY (consent_id) REFERENCES consents (id) ON DELETE CASCADE,
+    UNIQUE (student_id, consent_id)
 );

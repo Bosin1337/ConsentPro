@@ -30,6 +30,23 @@ erDiagram
         int student_id FK
     }
     USERS ||--|{ PARENTS : "is"
+    CLASSES ||--|{ CONSENTS : "has"
+    CONSENTS {
+        int id PK
+        varchar name
+        varchar file_path
+        timestamp deadline
+        int class_id FK
+    }
+    STUDENTS ||--|{ CONSENT_SUBMISSIONS : "submits"
+    CONSENTS ||--|{ CONSENT_SUBMISSIONS : "is for"
+    CONSENT_SUBMISSIONS {
+        int id PK
+        int student_id FK
+        int consent_id FK
+        varchar status
+        varchar submitted_file_path
+    }
 ```
 
 ## Описание таблиц
@@ -39,6 +56,8 @@ erDiagram
 *   **classes**: Таблица классов, создаваемых учителями.
 *   **students**: Ученики, привязанные к определенному классу.
 *   **parents**: Связующая таблица, которая соединяет пользователя-родителя (`user_id`) с его ребенком-учеником (`student_id`).
+*   **consents**: Хранит информацию о созданных согласиях (название, файл, дедлайн, класс).
+*   **consent_submissions**: Хранит статусы сдачи согласий каждым учеником.
 
 ## SQL-скрипт для создания таблиц
 
@@ -88,4 +107,28 @@ CREATE TABLE parents (
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE,
     UNIQUE (user_id, student_id)
+);
+
+-- Создание таблицы согласий
+CREATE TABLE consents (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    deadline TIMESTAMP WITH TIME ZONE,
+    class_id INT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (class_id) REFERENCES classes (id) ON DELETE CASCADE
+);
+
+-- Создание таблицы для отслеживания статусов сдачи согласий
+CREATE TABLE consent_submissions (
+    id SERIAL PRIMARY KEY,
+    student_id INT NOT NULL,
+    consent_id INT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Не сдано', -- "Не сдано", "Сдано", "Отказался", "Не идет", "Просрочено"
+    submitted_file_path VARCHAR(255),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE,
+    FOREIGN KEY (consent_id) REFERENCES consents (id) ON DELETE CASCADE,
+    UNIQUE (student_id, consent_id)
 );
