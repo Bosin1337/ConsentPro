@@ -2,6 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler, MessageHandler, filters, CommandHandler, CallbackQueryHandler
 from models.consent import get_consents_by_parent, update_submission_status
 from utils.auth import require_role
+from utils.document_analyzer import analyze_document
 import logging
 import os
 
@@ -78,7 +79,7 @@ async def submit_consent_start(update: Update, context: ContextTypes.DEFAULT_TYP
     return FILE
 
 async def handle_file_submission(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Получение файла согласия и сохранение на диск."""
+    """Получение файла согласия, сохранение на диск и анализ."""
     user_data = context.user_data
     file = update.message.document
 
@@ -100,11 +101,15 @@ async def handle_file_submission(update: Update, context: ContextTypes.DEFAULT_T
         file_path = f"uploads/{file.file_name}"
         await new_file.download_to_drive(custom_path=file_path)
 
-        # Обновляем статус в базе данных
+        # Анализируем документ с помощью ИИ
+        ai_determined_status = analyze_document(file_path)
+        logger.info(f"ИИ определил статус согласия как: {ai_determined_status}")
+
+        # Обновляем статус в базе данных с учетом анализа ИИ
         submission_id = user_data.get('consent_submission_id')
         if submission_id:
-            update_submission_status(submission_id, 'Сдано', file_path)
-            await update.message.reply_text(f"Файл '{file.file_name}' успешно загружен и статус обновлен на 'Сдано'.")
+            update_submission_status(submission_id, ai_determined_status, file_path)
+            await update.message.reply_text(f"Файл '{file.file_name}' успешно загружен. Статус согласия определен как '{ai_determined_status}'.")
         else:
             await update.message.reply_text("Произошла ошибка при обновлении статуса.")
 
@@ -113,8 +118,8 @@ async def handle_file_submission(update: Update, context: ContextTypes.DEFAULT_T
 
         return ConversationHandler.END
     except Exception as e:
-        logger.error(f"Ошибка при скачивании файла: {e}")
-        await update.message.reply_text("Произошла ошибка при загрузке файла. Попробуйте еще раз.")
+        logger.error(f"Ошибка при скачивании или анализе файла: {e}")
+        await update.message.reply_text("Произошла ошибка при загрузке или анализе файла. Попробуйте еще раз.")
         return FILE
 
 async def cancel_submission(update: Update, context: ContextTypes.DEFAULT_TYPE):
