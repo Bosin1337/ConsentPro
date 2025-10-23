@@ -44,6 +44,10 @@ def main():
     application.add_handler(CommandHandler("my_consents", my_consents))
     application.add_handler(submit_consent_conv_handler)
 
+    # Добавляем задачу в JobQueue для проверки дедлайнов (например, каждые 60 минут)
+    job_queue = application.job_queue
+    job_queue.run_repeating(check_deadlines, interval=3600, first=10) # Первый запуск через 10 секунд, затем каждые 60 минут
+
     # Запуск бота
     logger.info("Запуск бота...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
