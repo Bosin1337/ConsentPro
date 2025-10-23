@@ -41,6 +41,8 @@ def main():
     application.add_handler(CommandHandler("my_classes", my_classes))
     application.add_handler(CommandHandler("add_student", add_student))
     application.add_handler(upload_consent_conv_handler)
+    application.add_handler(CommandHandler("my_consents", my_consents))
+    application.add_handler(submit_consent_conv_handler)
 
     # Запуск бота
     logger.info("Запуск бота...")
