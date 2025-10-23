@@ -49,6 +49,10 @@ def main():
     job_queue = application.job_queue
     job_queue.run_repeating(check_deadlines, interval=3600, first=10) # Первый запуск через 10 секунд, затем каждые 60 минут
 
+    # Добавляем задачу в JobQueue для проверки приближающихся дедлайнов (например, один раз в день)
+    # Первый запуск через 60 секунд, затем каждые 24 часа (86400 секунд)
+    job_queue.run_repeating(check_upcoming_deadlines, interval=86400, first=60)
+
     # Запуск бота
     logger.info("Запуск бота...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
